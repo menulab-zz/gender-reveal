@@ -3,7 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>CAPTAIN NEW 20260224</title>
+  <title>CAPTAIN NEW 20260224_2</title>
+
+  <!-- ✅ 카톡 미리보기 스포 방지용: og.png(스포 없는 이미지) 업로드 권장 -->
+  <meta property="og:title" content="캡틴이 젠더리빌" />
+  <meta property="og:description" content="복권처럼 살살 긁어보세요 ✨" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- (일부 봇에 효과) -->
+  <meta name="robots" content="noimageindex" />
 
   <style>
     :root{
@@ -31,7 +41,6 @@
       padding: 24px 14px 40px;
       overflow-x:hidden;
     }
-
     .wrap{ width:100%; max-width:860px; }
     .title{
       text-align:center;
@@ -50,8 +59,6 @@
       overflow:hidden;
       position:relative;
     }
-
-    /* Fold/모바일 안정: 고정 비율 대신 vh 기반 */
     .scratchBox{
       position:relative;
       width:100%;
@@ -70,10 +77,8 @@
       justify-content:center;
       text-align:center;
       padding: 18px 16px 22px;
-      z-index: 2; /* prize layer */
+      z-index: 2;
     }
-
-    /* 정답 멘트: "공주님 ✨" */
     .winText{
       font-size:44px;
       font-weight:1100;
@@ -100,11 +105,10 @@
       background:#fff;
       display:none;
       position:relative;
-      z-index: 4; /* NEVER covered */
+      z-index: 4; /* 절대 가리지 않게 */
     }
     .babyImg.show{ display:block; }
 
-    /* 이미지 밑 문구 */
     .subText{
       margin: 12px 0 0;
       color: var(--muted);
@@ -116,7 +120,6 @@
     }
     .subText.show{ display:block; }
 
-    /* Scratch cover canvas (pointer layer) */
     #scratchCanvas{
       position:absolute;
       inset:0;
@@ -126,7 +129,6 @@
       z-index: 5;
     }
 
-    /* Scratch hint (작게) */
     .scratchHint{
       position:absolute;
       left:50%;
@@ -145,18 +147,19 @@
       user-select:none;
     }
 
-    /* Effects overlay (VISIBLE during scratch, but will hide on reveal) */
+    /* ✅ 효과는 스크래치 시작 후에만 보이게 */
     #fxOverlay{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
       pointer-events:none;
-      z-index: 7; /* above scratch cover so you can SEE effects */
-      opacity: .95;
-      transition: opacity .25s ease;
+      z-index: 7;  /* 긁는 동안 보이게 */
+      opacity: 0;  /* 기본은 안 보임 */
+      transition: opacity .2s ease;
       mix-blend-mode: screen;
     }
+    #fxOverlay.on{ opacity: .95; }
     #fxOverlay.hide{ opacity:0; }
 
     .actions{
@@ -195,7 +198,11 @@
       <div class="scratchBox" id="scratchBox">
         <div class="prize" aria-live="polite">
           <div class="winText" id="winText">공주님 ✨</div>
-          <img class="babyImg" id="babyImg" src="baby.png" alt="아기 이미지" />
+
+          <!-- ✅ 스포 방지 핵심: baby.png를 HTML에 src로 박아두지 않음
+               공개 순간에 JS로 <img src="baby.png"> 생성 -->
+          <img class="babyImg" id="babyImg" alt="아기 이미지" />
+
           <p class="subText" id="subText">우리 가족에게 새로운 기쁨이 찾아왔어요.</p>
         </div>
 
@@ -218,8 +225,8 @@
  *  Scratch Config
  *  ========================= */
 const RADIUS = 28;
-const CLEAR_THRESHOLD = 0.52;     // 공개 기준(52%)
-const ALPHA_CLEARED_MAX = 30;     // ✅ 핵심: 크롬 안티앨리어싱 대비 (alpha<=30도 "지워짐"으로 처리)
+const CLEAR_THRESHOLD = 0.52;
+const ALPHA_CLEARED_MAX = 30;  // 크롬 안티앨리어싱 대응
 const COVER_COLOR = "#B9B1C9";
 
 const box = document.getElementById("scratchBox");
@@ -238,10 +245,10 @@ const resetBtn = document.getElementById("resetBtn");
 let revealed = false;
 let drawing = false;
 let last = null;
+let fxStarted = false; // ✅ 스크래치 시작 전엔 효과 안 돌림
 
 function dpr(){ return Math.max(1, Math.floor(window.devicePixelRatio || 1)); }
 
-/** Fit canvases to box (DPR safe) */
 function fitCanvases(){
   const rect = box.getBoundingClientRect();
   const scale = dpr();
@@ -253,12 +260,11 @@ function fitCanvases(){
   scratchCanvas.style.height = rect.height + "px";
   scratchCtx.setTransform(scale,0,0,scale,0,0);
 
-  // fill cover (opaque)
+  // cover
   scratchCtx.globalCompositeOperation = "source-over";
   scratchCtx.fillStyle = COVER_COLOR;
   scratchCtx.fillRect(0,0,rect.width,rect.height);
 
-  // eraser mode
   scratchCtx.globalCompositeOperation = "destination-out";
   scratchCtx.fillStyle = "rgba(0,0,0,1)";
 
@@ -268,7 +274,6 @@ function fitCanvases(){
   fxCanvas.style.width = rect.width + "px";
   fxCanvas.style.height = rect.height + "px";
   fxCtx.setTransform(scale,0,0,scale,0,0);
-
   fxCtx.clearRect(0,0,rect.width,rect.height);
 }
 
@@ -278,7 +283,6 @@ function eraseAt(x,y){
   scratchCtx.fill();
 }
 
-/** pointer pos */
 function getPos(e){
   const rect = scratchCanvas.getBoundingClientRect();
   const clientX = e.touches?.[0]?.clientX ?? e.clientX;
@@ -287,11 +291,9 @@ function getPos(e){
 }
 
 /** =========================
- *  Effects overlay (during scratch)
- *  - visible even before reveal
- *  - will fade out on reveal so baby.png not covered
+ *  Effects overlay
  *  ========================= */
-const FX_EMOJIS = ["✨","🎇","🎆","💖","💫","🎉"];
+const FX_EMOJIS = ["✨","🎇","🎆","💖","💫","🎉","🫧"];
 const bursts = [];
 
 function spawnMiniBurst(){
@@ -318,17 +320,20 @@ function spawnMiniBurst(){
 }
 
 function drawFx(){
-  if(revealed) return; // stop drawing once revealed (we also fade out)
+  if(!fxStarted || revealed) return; // ✅ 시작 전/공개 후엔 안 그림
+
   const rect = scratchCanvas.getBoundingClientRect();
   fxCtx.clearRect(0,0,rect.width,rect.height);
 
-  // draw emoji sparkles lightly
-  if(Math.random() < 0.08){
+  // emoji sparkles
+  if(Math.random() < 0.12){
     fxCtx.font = "700 18px system-ui, sans-serif";
-    fxCtx.globalAlpha = 0.55;
-    fxCtx.fillText(FX_EMOJIS[Math.floor(Math.random()*FX_EMOJIS.length)],
-                   rect.width*(0.1+Math.random()*0.8),
-                   rect.height*(0.2+Math.random()*0.6));
+    fxCtx.globalAlpha = 0.60;
+    fxCtx.fillText(
+      FX_EMOJIS[Math.floor(Math.random()*FX_EMOJIS.length)],
+      rect.width*(0.1+Math.random()*0.8),
+      rect.height*(0.2+Math.random()*0.6)
+    );
     fxCtx.globalAlpha = 1;
   }
 
@@ -356,13 +361,19 @@ function drawFx(){
   requestAnimationFrame(drawFx);
 }
 
+function startFxIfNeeded(){
+  if(fxStarted) return;
+  fxStarted = true;
+  fxCanvas.classList.add("on");     // ✅ 긁기 시작부터 보이게
+  requestAnimationFrame(drawFx);
+}
+
 /** =========================
- *  Reveal detection (Chrome-safe)
+ *  Reveal detection
  *  ========================= */
 function checkClearPercent(){
   if(revealed) return;
 
-  // Downsample to reduce CPU
   const scale = 10;
   const sw = Math.max(30, Math.floor(scratchCanvas.width / scale));
   const sh = Math.max(30, Math.floor(scratchCanvas.height / scale));
@@ -377,39 +388,34 @@ function checkClearPercent(){
   let cleared = 0;
   const total = sw*sh;
 
-  // ✅ alpha === 0 이 아니라 alpha <= ALPHA_CLEARED_MAX 로 계산 (안티앨리어싱 대응)
   for(let i=3;i<data.length;i+=4){
     if(data[i] <= ALPHA_CLEARED_MAX) cleared++;
   }
 
-  const ratio = cleared / total;
-  if(ratio >= CLEAR_THRESHOLD) reveal();
+  if((cleared / total) >= CLEAR_THRESHOLD) reveal();
 }
 
 function reveal(){
   if(revealed) return;
   revealed = true;
 
-  // clear scratch completely
   scratchCtx.clearRect(0,0,scratchCanvas.width, scratchCanvas.height);
 
-  // show prize
+  // ✅ 정답 공개 순간에만 baby.png 로드 (스포 방지)
+  babyImg.src = "baby.png";
+
   winText.classList.add("show");
   babyImg.classList.add("show");
   subText.classList.add("show");
 
-  // fade out overlay effects so it never covers baby image
+  // ✅ 효과는 아기 그림 가리지 않게 즉시 페이드아웃
   fxCanvas.classList.add("hide");
   setTimeout(()=> {
     const rect = scratchCanvas.getBoundingClientRect();
     fxCtx.clearRect(0,0,rect.width,rect.height);
-  }, 300);
+  }, 260);
 
-  // celebrate a little (vibration)
   try{ navigator.vibrate?.([60,40,90]); }catch{}
-
-  // optional: one last mini burst before fade ends
-  spawnMiniBurst();
 }
 
 function resetAll(){
@@ -422,12 +428,16 @@ function resetAll(){
   babyImg.classList.remove("show");
   subText.classList.remove("show");
 
+  // reset baby image src to avoid preview bots learning it on reload
+  babyImg.removeAttribute("src");
+
+  // effects reset (but still OFF until scratch starts)
   fxCanvas.classList.remove("hide");
+  fxCanvas.classList.remove("on");
+  fxStarted = false;
   bursts.length = 0;
 
   fitCanvases();
-  // restart fx loop
-  requestAnimationFrame(drawFx);
 }
 
 /** =========================
@@ -435,6 +445,7 @@ function resetAll(){
  *  ========================= */
 function onDown(e){
   if(revealed) return;
+  startFxIfNeeded();          // ✅ 긁는 순간부터 효과 시작
   drawing = true;
   hint.style.display = "none";
 
@@ -442,14 +453,12 @@ function onDown(e){
   last = p;
   eraseAt(p.x, p.y);
 
-  // show some effect while scratching
   if(Math.random() < 0.9) spawnMiniBurst();
 }
 function onMove(e){
   if(!drawing || revealed) return;
   const p = getPos(e);
 
-  // interpolate to avoid gaps
   const dx = p.x - last.x;
   const dy = p.y - last.y;
   const dist = Math.hypot(dx,dy);
@@ -460,7 +469,6 @@ function onMove(e){
   }
   last = p;
 
-  // occasional effects during scratch
   if(Math.random() < 0.14) spawnMiniBurst();
 }
 function onUp(){
@@ -480,18 +488,10 @@ scratchCanvas.addEventListener("touchend", onUp, {passive:true});
 
 resetBtn.addEventListener("click", resetAll);
 
-// important: fold/rotate can change viewport without full reload
-window.addEventListener("resize", ()=> setTimeout(()=> {
-  // only refit if not revealed; if revealed keep prize layout
-  fitCanvases();
-}, 80));
+window.addEventListener("resize", ()=> setTimeout(()=> { fitCanvases(); }, 80));
 
-/** =========================
- *  Init
- *  ========================= */
 window.addEventListener("load", ()=>{
   fitCanvases();
-  requestAnimationFrame(drawFx);
 });
 </script>
 </body>
