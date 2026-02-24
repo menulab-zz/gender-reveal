@@ -31,17 +31,14 @@
       padding: 26px 16px 40px;
       overflow-x:hidden;
     }
-    .wrap{
-      width: 100%;
-      max-width: 880px;
-    }
+    .wrap{ width:100%; max-width:880px; }
     .title{
       text-align:center;
-      font-weight: 1000;
-      font-size: 22px;
-      letter-spacing: -.02em;
+      font-weight:1000;
+      font-size:22px;
+      letter-spacing:-.02em;
       margin: 6px 0 14px;
-      line-height: 1.35;
+      line-height:1.35;
     }
     .card{
       background: var(--card);
@@ -54,16 +51,16 @@
     }
     .scratchBox{
       position:relative;
-      width: 100%;
+      width:100%;
       aspect-ratio: 16 / 10;
       min-height: 320px;
-      background: #f8fafc;
+      background:#f8fafc;
     }
-    @media (max-width: 520px){
-      .scratchBox{ min-height: 300px; aspect-ratio: 4 / 3; }
+    @media (max-width:520px){
+      .scratchBox{ min-height:300px; aspect-ratio:4/3; }
     }
 
-    /* Under layer (prize) */
+    /* Prize layer */
     .prize{
       position:absolute;
       inset:0;
@@ -71,14 +68,16 @@
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      padding: 18px 16px 22px;
+      padding:18px 16px 22px;
       text-align:center;
+      z-index: 2; /* above sparkles */
     }
+
     .winText{
-      font-size: 44px;
-      font-weight: 1100;
-      margin: 0 0 12px;
-      letter-spacing: -.03em;
+      font-size:44px;
+      font-weight:1100;
+      margin:0 0 12px;
+      letter-spacing:-.03em;
       background: linear-gradient(90deg,#ff6ea3,#ffb3d1);
       -webkit-background-clip:text;
       background-clip:text;
@@ -95,10 +94,10 @@
       border-radius: 16px;
       box-shadow:0 16px 40px rgba(0,0,0,.12);
       border: 1px solid rgba(0,0,0,.06);
-      display:none;
       background:#fff;
+      display:none;
       position:relative;
-      z-index: 2; /* keep above sparkles */
+      z-index: 3; /* ensure nothing covers */
     }
     .babyImg.show{ display:block; }
 
@@ -106,55 +105,52 @@
       margin: 12px 0 0;
       color: var(--muted);
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       display:none;
       position:relative;
-      z-index:2;
+      z-index: 3;
     }
     .subText.show{ display:block; }
 
-    /* Scratch canvas layer */
+    /* Scratch cover */
     #scratchCanvas{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
       touch-action:none;
-      z-index: 1;
+      z-index: 4; /* cover sits above prize until scratched */
     }
 
-    /* Top hint overlay (before reveal) */
+    /* Optional small hint (doesn't block image; disappears after first scratch) */
     .scratchHint{
       position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      left:50%;
+      top:50%;
+      transform: translate(-50%,-50%);
       pointer-events:none;
-      z-index: 2;
-    }
-    .scratchHintInner{
-      padding: 10px 14px;
-      border-radius: 999px;
+      z-index: 5;
+      padding:10px 14px;
+      border-radius:999px;
       background: rgba(255,255,255,.40);
       border: 1px dashed rgba(255,255,255,.8);
       color: rgba(255,255,255,.95);
-      font-weight: 1000;
-      letter-spacing: -.01em;
+      font-weight:1000;
+      letter-spacing:-.01em;
       text-shadow: 0 8px 20px rgba(0,0,0,.22);
     }
 
-    /* Fireworks canvas (keep behind the card so it never covers image) */
+    /* Fireworks: ALWAYS behind everything (won’t cover baby) */
     #fx{
       position: fixed;
       inset: 0;
       pointer-events:none;
-      z-index: 0;     /* behind everything */
+      z-index: 0;
       display:none;
     }
     #fx.show{ display:block; }
 
-    /* Floating sparkles (also behind image) */
+    /* Sparkles: behind card content */
     .spark{
       position:absolute;
       font-size: 18px;
@@ -162,20 +158,12 @@
       animation: rise 2.6s linear forwards;
       filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
       pointer-events:none;
-      z-index: 0; /* behind baby image */
+      z-index: 1; /* behind prize/image */
     }
     @keyframes rise{
       0%{ transform: translateY(0) scale(1); opacity:0; }
       12%{ opacity:.95; }
       100%{ transform: translateY(-240px) scale(1.15); opacity:0; }
-    }
-
-    .footer{
-      text-align:center;
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 12px;
-      user-select:none;
     }
 
     .actions{
@@ -188,42 +176,50 @@
     .btn{
       appearance:none;
       border:none;
-      border-radius: 14px;
-      padding: 11px 14px;
-      font-weight: 1000;
+      border-radius:14px;
+      padding:11px 14px;
+      font-weight:1000;
       cursor:pointer;
-      background: #111827;
-      color: #fff;
-      transition: transform .08s ease, opacity .2s ease;
+      background:#111827;
+      color:#fff;
+      transition: transform .08s ease;
     }
     .btn:active{ transform: scale(.98); }
+
+    .footer{
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 12px;
+      user-select:none;
+    }
   </style>
 </head>
 <body>
   <canvas id="fx"></canvas>
 
   <div class="wrap">
+    <!-- ✅ 최상단 문구: "캡틴이의 성별이 궁금한가요?" 만 -->
     <div class="title">캡틴이의 성별이 궁금한가요?</div>
 
     <div class="card">
       <div class="scratchBox" id="scratchBox">
-        <!-- Under layer (prize) -->
         <div class="prize" aria-live="polite">
+          <!-- ✅ 하트 포함 -->
           <div class="winText" id="winText">공주님! 입니다 💖</div>
           <img class="babyImg" id="babyImg" src="baby.png" alt="아기 이미지" />
+          <!-- ✅ 이미지 아래 문구 -->
           <p class="subText" id="subText">우리 가족에게 새로운 기쁨이 찾아왔어요.</p>
         </div>
 
-        <!-- Scratch cover -->
         <canvas id="scratchCanvas" aria-label="스크래치 영역"></canvas>
 
-        <!-- Visual hint on top -->
-        <div class="scratchHint" id="scratchHint">
-          <div class="scratchHintInner">👆 여기 긁기</div>
-        </div>
+        <!-- (선택) 아주 작은 힌트: 원치 않으면 아래 div 삭제해도 됨 -->
+        <div class="scratchHint" id="scratchHint">👆 여기 긁기</div>
       </div>
     </div>
 
+    <!-- ✅ 테스트 버튼 제거 / 다시하기만 유지 -->
     <div class="actions">
       <button class="btn" id="resetBtn" type="button">다시 하기</button>
     </div>
@@ -232,12 +228,10 @@
   </div>
 
   <script>
-    /**********************
-     * Scratch settings
-     **********************/
-    const RADIUS = 28;             // 브러시 크기
-    const CLEAR_THRESHOLD = 0.55;  // 55% 이상 긁으면 공개 (복권 느낌)
-    const COVER_COLOR = "#B9B1C9"; // 스크래치 코팅 색
+    // ===== Scratch settings =====
+    const RADIUS = 28;
+    const CLEAR_THRESHOLD = 0.55;
+    const COVER_COLOR = "#B9B1C9";
 
     const canvas = document.getElementById("scratchCanvas");
     const box = document.getElementById("scratchBox");
@@ -253,10 +247,7 @@
     let lastX = 0, lastY = 0;
     let revealed = false;
 
-    /**********************
-     * Sparkles + fireworks
-     * - Must NOT cover baby image: keep behind the card / behind image
-     **********************/
+    // ===== Sparkles (behind image) =====
     const SPARKS = ["✨","🎆","🎇","💖","💫","🎉","🫧"];
     function spawnSpark(){
       if(revealed) return;
@@ -270,10 +261,11 @@
       setTimeout(()=> el.remove(), 3200);
     }
 
-    // Fireworks (simple particles) behind everything (fx canvas z-index 0)
+    // ===== Fireworks: behind everything =====
     const fxCanvas = document.getElementById("fx");
     const fxCtx = fxCanvas.getContext("2d");
     let particles = [];
+
     function resizeFx(){
       fxCanvas.width = window.innerWidth * devicePixelRatio;
       fxCanvas.height = window.innerHeight * devicePixelRatio;
@@ -320,13 +312,11 @@
         requestAnimationFrame(fxLoop);
       }
     }
-
     function startFireworks(){
       fxCanvas.classList.add("show");
       resizeFx();
       const w = window.innerWidth, h = window.innerHeight;
 
-      // Bursts away from center-ish so it doesn't visually "sit" on the card
       addBurst(w*0.15, h*0.22);
       addBurst(w*0.85, h*0.20);
       setTimeout(()=>addBurst(w*0.50, h*0.12), 180);
@@ -341,9 +331,7 @@
       }, 3800);
     }
 
-    /**********************
-     * Scratch implementation
-     **********************/
+    // ===== Scratch implementation =====
     function fitCanvas(){
       const rect = box.getBoundingClientRect();
       canvas.width = rect.width * devicePixelRatio;
@@ -354,20 +342,12 @@
       ctx = canvas.getContext("2d");
       ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 
-      // cover fill
+      // ✅ 덮개: 안내 문구(“여기를 긁어주세요”)도 요청대로 삭제 (완전 단색)
       ctx.globalCompositeOperation = "source-over";
       ctx.fillStyle = COVER_COLOR;
       ctx.fillRect(0,0,rect.width,rect.height);
 
-      // add subtle pattern/text
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      ctx.font = '1000 34px "Noto Sans KR", sans-serif';
-      ctx.textAlign = "center";
-      ctx.fillText("SCRATCH", rect.width/2, rect.height/2 - 6);
-      ctx.font = '900 16px "Noto Sans KR", sans-serif';
-      ctx.fillText("여기를 긁어주세요", rect.width/2, rect.height/2 + 22);
-
-      // switch to eraser mode
+      // 지우개 모드
       ctx.globalCompositeOperation = "destination-out";
       ctx.fillStyle = "rgba(0,0,0,1)";
     }
@@ -391,7 +371,7 @@
       const p = getPos(e);
       lastX = p.x; lastY = p.y;
       erase(lastX, lastY);
-      hint.style.display = "none";
+      if(hint) hint.style.display = "none";
       if(Math.random() < 0.5) spawnSpark();
     }
 
@@ -402,9 +382,7 @@
       const dist = Math.hypot(dx,dy);
       const step = Math.max(1, Math.floor(dist / (RADIUS/2)));
       for(let i=0;i<=step;i++){
-        const ix = lastX + dx*(i/step);
-        const iy = lastY + dy*(i/step);
-        erase(ix,iy);
+        erase(lastX + dx*(i/step), lastY + dy*(i/step));
       }
       lastX = p.x; lastY = p.y;
       if(Math.random() < 0.12) spawnSpark();
@@ -418,58 +396,44 @@
 
     function checkClearPercent(){
       if(revealed) return;
-      try{
-        const sampleScale = 8;
-        const sw = Math.max(24, Math.floor(canvas.width / sampleScale));
-        const sh = Math.max(24, Math.floor(canvas.height / sampleScale));
-        const small = document.createElement("canvas");
-        small.width = sw;
-        small.height = sh;
-        const sctx = small.getContext("2d");
-        sctx.drawImage(canvas, 0, 0, sw, sh);
-        const data = sctx.getImageData(0,0,sw,sh).data;
+      const sampleScale = 8;
+      const sw = Math.max(24, Math.floor(canvas.width / sampleScale));
+      const sh = Math.max(24, Math.floor(canvas.height / sampleScale));
+      const small = document.createElement("canvas");
+      small.width = sw;
+      small.height = sh;
+      const sctx = small.getContext("2d");
+      sctx.drawImage(canvas, 0, 0, sw, sh);
+      const data = sctx.getImageData(0,0,sw,sh).data;
 
-        let cleared = 0;
-        const total = sw * sh;
-        for(let i=0;i<data.length;i+=4){
-          if(data[i+3] === 0) cleared++;
-        }
-        const ratio = cleared / total;
-        if(ratio >= CLEAR_THRESHOLD){
-          reveal();
-        }
-      }catch(err){
-        console.warn("checkClearPercent error", err);
+      let cleared = 0;
+      const total = sw * sh;
+      for(let i=0;i<data.length;i+=4){
+        if(data[i+3] === 0) cleared++;
       }
+      if((cleared / total) >= CLEAR_THRESHOLD) reveal();
     }
 
     function reveal(){
       if(revealed) return;
       revealed = true;
 
-      // fully clear canvas
       ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      // show prize
       winText.classList.add("show");
       babyImg.classList.add("show");
       subText.classList.add("show");
 
-      // fireworks behind the card
+      // ✅ 효과는 배경으로만
       startFireworks();
+      for(let i=0;i<14;i++) setTimeout(spawnSpark, i*90);
 
-      // sparkles burst (behind image)
-      for(let i=0;i<14;i++){
-        setTimeout(spawnSpark, i*90);
-      }
-
-      // tiny vibration
       try { navigator.vibrate?.([70, 50, 90]); } catch {}
     }
 
     function resetAll(){
       revealed = false;
-      hint.style.display = "flex";
+      if(hint) hint.style.display = "block";
       winText.classList.remove("show");
       babyImg.classList.remove("show");
       subText.classList.remove("show");
