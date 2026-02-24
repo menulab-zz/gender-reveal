@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>젠더리빌 🎆 흔들면 공개!</title>
+  <meta name="theme-color" content="#ffb6c1" />
+  <style>
+    :root{
+      --bg1:#ffe6f2;
+      --bg2:#e8f6ff;
+      --card:#ffffffcc;
+      --shadow: 0 20px 60px rgba(0,0,0,.12);
+      --text:#1f2937;
+      --muted:#6b7280;
+      --btn:#111827;
+      --btnText:#fff;
+      --accent:#ff4d8d;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100svh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1100px 700px at 20% 10%, var(--bg1), transparent 60%),
+        radial-gradient(1100px 700px at 80% 20%, var(--bg2), transparent 60%),
+        linear-gradient(180deg, #fff, #fff);
+      overflow-x:hidden;
+    }
+    .wrap{
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 24px 18px 40px;
+      position:relative;
+    }
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin-top: 10px;
+      user-select:none;
+    }
+    .badge{
+      padding: 6px 10px;
+      border-radius:999px;
+      background: #ffffffb3;
+      border: 1px solid rgba(0,0,0,.06);
+      backdrop-filter: blur(10px);
+      font-weight:700;
+      font-size:13px;
+    }
+    h1{
+      margin: 18px 0 8px;
+      text-align:center;
+      font-size: 30px;
+      letter-spacing: -.02em;
+    }
+    .sub{
+      text-align:center;
+      color:var(--muted);
+      margin:0 0 18px;
+      line-height:1.5;
+    }
+    .card{
+      margin: 16px auto 0;
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+      position:relative;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      align-items: center;
+    }
+    @media (max-width: 820px){
+      .grid{grid-template-columns:1fr; }
+    }
+    .panel{
+      padding: 16px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+    .big{
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 0 8px;
+    }
+    .hint{
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    .ctaRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    button{
+      appearance:none;
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      cursor:pointer;
+      background: var(--btn);
+      color: var(--btnText);
+      transition: transform .08s ease, opacity .2s ease;
+    }
+    button:active{ transform: scale(.98); }
+    .ghost{
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(0,0,0,.12);
+    }
+    .status{
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .meterWrap{
+      margin-top:12px;
+      background: #f3f4f6;
+      border-radius: 999px;
+      overflow:hidden;
+      height: 10px;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+    .meter{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #60a5fa, #f472b6, #fb7185);
+      transition: width .12s ease;
+    }
+
+    /* Reveal */
+    .reveal{
+      display:none;
+      text-align:center;
+      padding: 20px 10px 8px;
+    }
+    .reveal.show{ display:block; }
+    .title2{
+      font-size: 16px;
+      font-weight:800;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .answer{
+      font-size: 42px;
+      font-weight: 1000;
+      margin: 0 0 8px;
+      letter-spacing: -.03em;
+      text-shadow: 0 10px 25px rgba(0,0,0,.08);
+    }
+    .answer.prince{ color:#2f7cf6; }
+    .answer.princess{ color:#ff4d8d; }
+    .note{
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .babyArt{
+      display:flex;
+      justify-content:center;
+      margin: 14px 0 10px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.08);
+      background:#ffffffd9;
+      font-weight:800;
+      font-size: 13px;
+    }
+
+    /* Floating hearts/stars */
+    .float{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      border-radius: 22px;
+    }
+    .spark{
+      position:absolute;
+      font-size: 18px;
+      opacity:.85;
+      animation: rise 2.8s linear forwards;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
+    }
+    @keyframes rise{
+      0%{ transform: translateY(0) scale(1); opacity:.0; }
+      10%{ opacity:.95; }
+      100%{ transform: translateY(-260px) scale(1.15); opacity:0; }
+    }
+
+    /* Canvas fireworks */
+    #fx{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      z-index: 50;
+      display:none;
+    }
+    #fx.show{ display:block; }
+
+    /* Footer */
+    .foot{
+      text-align:center;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      user-select:none;
+    }
+    code.inline{
+      background:#1118270d;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,.06);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<div class="wrap">
+  <div class="header">
+    <div class="badge">👶 젠더리빌</div>
+    <div class="badge">🎆 흔들면 공개</div>
+    <div class="badge">💖 축하해줘요</div>
+  </div>
+
+  <h1>핸드폰을 흔들어 보세요!</h1>
+  <p class="sub">
+    <b>3번 정도</b> 톡톡 흔들면… 🎉<br/>
+    (아이폰은 <b>시작하기</b> 버튼을 먼저 눌러야 해요)
+  </p>
+
+  <div class="card">
+    <div class="float" id="floatLayer"></div>
+
+    <div class="grid">
+      <div class="panel">
+        <p class="big">📣 준비되면 시작!</p>
+        <p class="hint">
+          버튼을 누른 뒤 <b>핸드폰을 흔들면</b> “왕자님/공주님”이 공개되고
+          폭죽 파티가 터져요 🎆
+        </p>
+
+        <div class="ctaRow">
+          <button id="btnStart">시작하기(권한 허용)</button>
+          <button class="ghost" id="btnTest">테스트 공개(흔들기 없이)</button>
+          <button class="ghost" id="btnReset">리셋</button>
+          <span class="status" id="status">상태: 대기 중</span>
+        </div>
+
+        <div class="meterWrap" aria-label="shake meter">
+          <div class="meter" id="meter"></div>
+        </div>
+
+        <div class="foot">
+          흔들기 인식이 잘 안 되면: 케이스를 잡고 <b>짧게</b> 2~3번 흔들어봐요 🙌
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="reveal" id="reveal">
+          <p class="title2">두구두구두구…</p>
+          <p class="answer" id="answerText">왕자님</p>
+
+          <div class="babyArt" id="babyArt"></div>
+
+          <p class="note" id="note">
+            우리 가족이 한 명 더 늘었어요 💕
+          </p>
+
+          <div class="pill" id="pill">
+            🎁 축하 한마디 남겨주세요!
+          </div>
+        </div>
+
+        <div id="placeholder" style="text-align:center; padding:18px 10px;">
+          <div style="font-size:54px;">🍼</div>
+          <div style="font-weight:900; margin-top:6px;">아직 비밀이에요</div>
+          <div style="color:var(--muted); margin-top:6px; font-size:14px; line-height:1.5;">
+            흔들면 공개!<br/>
+            화면 위 폭죽도 기대해줘요 🎆
+          </div>
+          <div style="margin-top:10px; font-size:12px; color:var(--muted);">
+            힌트: <code class="inline">왕자님</code> / <code class="inline">공주님</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot" style="margin-top:18px;">
+    만든 사람: 우리 가족 💗
+  </div>
+</div>
+
+<script>
+  /**********************
+   * 1) 설정(여기만 바꾸면 됨)
+   **********************/
+  // ✅ 원하는 결과로 바꿔줘: "prince" or "princess"
+  // - 왕자님: "prince"
+  // - 공주님: "princess"
+  const REVEAL_RESULT = "prince";
+
+  // 공개 문구
+  const LABELS = {
+    prince: "왕자님",
+    princess: "공주님"
+  };
+
+  /**********************
+   * 2) UI 요소
+   **********************/
+  const btnStart = document.getElementById("btnStart");
+  const btnTest  = document.getElementById("btnTest");
+  const btnReset = document.getElementById("btnReset");
+  const statusEl = document.getElementById("status");
+  const meterEl  = document.getElementById("meter");
+
+  const revealEl = document.getElementById("reveal");
+  const answerText = document.getElementById("answerText");
+  const babyArt = document.getElementById("babyArt");
+  const noteEl = document.getElementById("note");
+  const placeholder = document.getElementById("placeholder");
+  const floatLayer = document.getElementById("floatLayer");
+
+  const fxCanvas = document.getElementById("fx");
+  const fxCtx = fxCanvas.getContext("2d");
+
+  let armed = false;
+  let revealed = false;
+
+  /**********************
+   * 3) 귀여운 아기 SVG (간단, 파일 없이 내장)
+   **********************/
+  function babySvg(theme){
+    const isPrince = theme === "prince";
+    const hat = isPrince ? "#60a5fa" : "#f472b6";
+    const cheek = isPrince ? "#93c5fd" : "#fda4af";
+
+    return `
+      <svg width="220" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="baby">
+        <defs>
+          <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="rgba(0,0,0,.14)"/>
+          </filter>
+        </defs>
+
+        <!-- body -->
+        <g filter="url(#s)">
+          <path d="M40 118c10-30 35-48 70-48s60 18 70 48c-22 20-47 32-70 32s-48-12-70-32Z" fill="#fff"/>
+          <path d="M52 120c18 16 38 24 58 24s40-8 58-24" stroke="rgba(0,0,0,.06)" stroke-width="6" stroke-linecap="round"/>
+        </g>
+
+        <!-- head -->
+        <g filter="url(#s)">
+          <circle cx="110" cy="62" r="44" fill="#fff"/>
+          <circle cx="92" cy="70" r="7" fill="${cheek}" opacity="0.55"/>
+          <circle cx="128" cy="70" r="7" fill="${cheek}" opacity="0.55"/>
+          <circle cx="94" cy="60" r="5" fill="#111827"/>
+          <circle cx="126" cy="60" r="5" fill="#111827"/>
+          <path d="M101 79c7 7 11 7 18 0" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <!-- hat -->
+        <g filter="url(#s)">
+          <path d="M70 44c18-22 62-22 80 0c-10 6-26 10-40 10S80 50 70 44Z" fill="${hat}"/>
+          <circle cx="110" cy="34" r="8" fill="${hat}"/>
+        </g>
+
+        <!-- tiny stars -->
+        <g opacity="0.9">
+          <path d="M24 38l4 10l10 4l-10 4l-4 10l-4-10l-10-4l10-4l4-10Z" fill="${hat}" opacity="0.55"/>
+          <path d="M190 28l3 8l8 3l-8 3l-3 8l-3-8l-8-3l8-3l3-8Z" fill="${hat}" opacity="0.55"/>
+        </g>
+      </svg>
+    `;
+  }
+
+  /**********************
+   * 4) 떠다니는 이모지(파티 분위기)
+   **********************/
+  const PARTY_EMOJIS = ["🎆","🎇","✨","💖","💫","🎉","🫧"];
+  function spawnSpark(){
+    if(!armed || revealed) return;
+    const el = document.createElement("div");
+    el.className = "spark";
+    el.textContent = PARTY_EMOJIS[Math.floor(Math.random()*PARTY_EMOJIS.length)];
+    const x = Math.random()*100;
+    el.style.left = x + "%";
+    el.style.bottom = "-10px";
+    el.style.animationDuration = (2.2 + Math.random()*1.2) + "s";
+    floatLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 3200);
+  }
+  let sparkTimer = null;
+
+  /**********************
+   * 5) 폭죽(간단 파티클)
+   **********************/
+  function resizeFx(){
+    fxCanvas.width = window.innerWidth * devicePixelRatio;
+    fxCanvas.height = window.innerHeight * devicePixelRatio;
+    fxCanvas.style.width = window.innerWidth + "px";
+    fxCanvas.style.height = window.innerHeight + "px";
+    fxCtx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  window.addEventListener("resize", resizeFx);
+  resizeFx();
+
+  let particles = [];
+  function addBurst(x, y){
+    const count = 90;
+    for(let i=0;i<count;i++){
+      const a = Math.random() * Math.PI * 2;
+      const sp = 1.5 + Math.random()*5.5;
+      particles.push({
+        x, y,
+        vx: Math.cos(a)*sp,
+        vy: Math.sin(a)*sp - (Math.random()*1.5),
+        life: 70 + Math.random()*30,
+        r: 2 + Math.random()*2.2,
+        hue: Math.floor(Math.random()*360)
+      });
+    }
+  }
+  function fxLoop(){
+    fxCtx.clearRect(0,0, window.innerWidth, window.innerHeight);
+
+    // gentle fade trail
+    fxCtx.fillStyle = "rgba(255,255,255,0.10)";
+    fxCtx.fillRect(0,0, window.innerWidth, window.innerHeight);
+
+    particles = particles.filter(p => p.life > 0);
+    for(const p of particles){
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.985;
+      p.vy *= 0.985;
+      p.vy += 0.03;
+      p.life -= 1;
+
+      fxCtx.beginPath();
+      fxCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      fxCtx.fillStyle = `hsla(${p.hue}, 92%, 62%, ${Math.max(0, p.life/110)})`;
+      fxCtx.fill();
+    }
+
+    if(fxCanvas.classList.contains("show")){
+      requestAnimationFrame(fxLoop);
+    }
+  }
+
+  function startFireworks(){
+    fxCanvas.classList.add("show");
+    resizeFx();
+    // bursts
+    const w = window.innerWidth, h = window.innerHeight;
+    addBurst(w*0.25, h*0.35);
+    addBurst(w*0.75, h*0.32);
+    setTimeout(()=>addBurst(w*0.50, h*0.25), 180);
+    setTimeout(()=>addBurst(w*0.38, h*0.45), 360);
+    setTimeout(()=>addBurst(w*0.62, h*0.48), 520);
+    fxLoop();
+
+    // stop after a while
+    setTimeout(()=>{
+      fxCanvas.classList.remove("show");
+      particles = [];
+      fxCtx.clearRect(0,0, w, h);
+    }, 4200);
+  }
+
+  /**********************
+   * 6) 흔들기 감지
+   **********************/
+  // 단순 threshold 방식 (가볍고 잘 먹힘)
+  let shakeScore = 0;
+  let lastTime = 0;
+
+  const SHAKE_THRESHOLD = 16; // 민감도 (낮을수록 민감)
+  const SHAKE_TARGET = 3;     // 몇 번 흔들면 공개로 볼지(체감)
+
+  function setStatus(msg){ statusEl.textContent = "상태: " + msg; }
+  function setMeter(v){
+    const pct = Math.min(100, Math.max(0, v));
+    meterEl.style.width = pct + "%";
+  }
+
+  function onMotion(e){
+    if(!armed || revealed) return;
+    const a = e.accelerationIncludingGravity;
+    if(!a) return;
+
+    const now = Date.now();
+    if(now - lastTime < 80) return; // 너무 잦은 샘플 방지
+    lastTime = now;
+
+    const ax = a.x || 0, ay = a.y || 0, az = a.z || 0;
+    const magnitude = Math.sqrt(ax*ax + ay*ay + az*az);
+
+    // magnitude가 일정 이상이면 흔들기 카운트 업
+    if(magnitude > SHAKE_THRESHOLD){
+      shakeScore += 1;
+      const pct = (shakeScore / SHAKE_TARGET) * 100;
+      setMeter(pct);
+      setStatus(`흔들기 감지! (${shakeScore}/${SHAKE_TARGET})`);
+      // 파티 이모지
+      spawnSpark();
+
+      if(shakeScore >= SHAKE_TARGET){
+        doReveal();
+      }
+    } else {
+      // 살짝 천천히 줄어들게
+      shakeScore = Math.max(0, shakeScore - 0.2);
+      setMeter((shakeScore / SHAKE_TARGET) * 100);
+    }
+  }
+
+  async function requestMotionPermissionIfNeeded(){
+    // iOS 13+ requires permission
+    const D = window.DeviceMotionEvent;
+    if(!D) return { ok:false, reason:"이 기기는 흔들기 센서를 지원하지 않아요." };
+
+    if(typeof D.requestPermission === "function"){
+      try{
+        const res = await D.requestPermission();
+        if(res !== "granted"){
+          return { ok:false, reason:"모션 권한이 필요해요. (설정에서 허용 가능)" };
+        }
+      }catch(err){
+        return { ok:false, reason:"모션 권한 요청 중 오류가 발생했어요." };
+      }
+    }
+    return { ok:true };
+  }
+
+  function arm(){
+    if(armed) return;
+    armed = true;
+    revealed = false;
+    shakeScore = 0;
+    setMeter(0);
+    setStatus("흔들어 보세요!");
+    window.addEventListener("devicemotion", onMotion, { passive:true });
+
+    // 분위기용 spark 자동 생성(아주 약하게)
+    sparkTimer = setInterval(spawnSpark, 420);
+  }
+
+  function disarm(){
+    armed = false;
+    window.removeEventListener("devicemotion", onMotion);
+    if(sparkTimer) clearInterval(sparkTimer);
+    sparkTimer = null;
+  }
+
+  function doReveal(){
+    if(revealed) return;
+    revealed = true;
+    disarm();
+
+    const result = REVEAL_RESULT;
+    answerText.textContent = LABELS[result] || "공개!";
+    answerText.classList.toggle("prince", result === "prince");
+    answerText.classList.toggle("princess", result === "princess");
+
+    babyArt.innerHTML = babySvg(result);
+    noteEl.textContent = (result === "prince")
+      ? "우리 집에 ‘왕자님’이 찾아왔어요 💙"
+      : "우리 집에 ‘공주님’이 찾아왔어요 💖";
+
+    placeholder.style.display = "none";
+    revealEl.classList.add("show");
+
+    // 폭죽!
+    startFireworks();
+
+    // 작은 진동 (지원 기기)
+    try { navigator.vibrate?.([70, 50, 90]); } catch {}
+  }
+
+  function resetAll(){
+    disarm();
+    revealed = false;
+    shakeScore = 0;
+    setMeter(0);
+    setStatus("대기 중");
+    revealEl.classList.remove("show");
+    placeholder.style.display = "block";
+    floatLayer.innerHTML = "";
+  }
+
+  /**********************
+   * 7) 버튼 이벤트
+   **********************/
+  btnStart.addEventListener("click", async ()=>{
+    const perm = await requestMotionPermissionIfNeeded();
+    if(!perm.ok){
+      setStatus(perm.reason);
+      alert(perm.reason);
+      return;
+    }
+    resetAll();
+    arm();
+  });
+
+  btnTest.addEventListener("click", ()=>{
+    // 시작 없이도 공개 테스트
+    resetAll();
+    doReveal();
+  });
+
+  btnReset.addEventListener("click", ()=>{
+    resetAll();
+  });
+
+  // 초기 상태
+  resetAll();
+</script>
+</body>
+</html>
