@@ -3,228 +3,373 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>젠더리빌 — 스크래치 공개</title>
+  <title>캡틴이 젠더리빌 — 스크래치</title>
   <meta name="theme-color" content="#fff0f6" />
   <style>
     :root{
-      --bg: #fffafc;
-      --card: #ffffff;
+      --bg1:#fff7fb;
+      --bg2:#f2f8ff;
+      --card:#ffffffcc;
+      --text:#111827;
       --muted:#6b7280;
       --accent:#ff4d8d;
-      --maxw:920px;
-      --radius:18px;
-      font-family: "Noto Sans KR", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --shadow: 0 20px 60px rgba(0,0,0,.12);
+      --radius: 22px;
+      font-family: "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
       margin:0;
-      background: linear-gradient(180deg,#fff #fffafc);
+      min-height:100svh;
+      background:
+        radial-gradient(1100px 700px at 20% 10%, var(--bg1), transparent 60%),
+        radial-gradient(1100px 700px at 80% 20%, var(--bg2), transparent 60%),
+        linear-gradient(180deg, #fff, #fff);
+      color:var(--text);
       display:flex;
-      align-items:center;
       justify-content:center;
-      padding:28px;
-      color:#111827;
+      padding: 26px 16px 40px;
+      overflow-x:hidden;
     }
-    .container{
-      width:100%;
-      max-width:var(--maxw);
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:20px;
-      box-shadow:0 18px 40px rgba(16,24,40,.08);
+    .wrap{
+      width: 100%;
+      max-width: 880px;
     }
-    h1{margin:6px 0 4px;font-size:20px;text-align:center}
-    p.lead{margin:0 0 14px;text-align:center;color:var(--muted)}
-    .wrap{display:grid;grid-template-columns:1fr;gap:14px;align-items:start;}
-
+    .title{
+      text-align:center;
+      font-weight: 1000;
+      font-size: 22px;
+      letter-spacing: -.02em;
+      margin: 6px 0 14px;
+      line-height: 1.35;
+    }
     .card{
-      position:relative;
-      border-radius:14px;
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
       overflow:hidden;
-      background:linear-gradient(180deg,#fff,#fff);
-      border:1px solid rgba(0,0,0,.04);
-      padding:18px;
-      display:flex;
-      gap:16px;
-      align-items:center;
+      position:relative;
     }
-    .left{
-      flex:0 0 230px;
+    .scratchBox{
+      position:relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      min-height: 320px;
+      background: #f8fafc;
+    }
+    @media (max-width: 520px){
+      .scratchBox{ min-height: 300px; aspect-ratio: 4 / 3; }
+    }
+
+    /* Under layer (prize) */
+    .prize{
+      position:absolute;
+      inset:0;
       display:flex;
       flex-direction:column;
-      gap:12px;
       align-items:center;
       justify-content:center;
+      padding: 18px 16px 22px;
       text-align:center;
     }
-    .iconBottle{
-      width:86px;height:86px;border-radius:999px;
-      background:linear-gradient(180deg,#fff,#f8fafc);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:0 8px 22px rgba(16,24,40,.06);
-      border:1px solid rgba(0,0,0,.04);
+    .winText{
+      font-size: 44px;
+      font-weight: 1100;
+      margin: 0 0 12px;
+      letter-spacing: -.03em;
+      background: linear-gradient(90deg,#ff6ea3,#ffb3d1);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+      text-shadow: 0 14px 30px rgba(0,0,0,.08);
+      display:none;
     }
-    .iconBottle svg{width:48px;height:48px}
-    .hint{font-weight:800;font-size:15px;color:#111827;line-height:1.35;}
-    .hintSmall{color:var(--muted);font-size:13px;line-height:1.45;}
+    .winText.show{ display:block; }
 
-    .scratchArea{
+    .babyImg{
+      width: min(520px, 92%);
+      max-height: 62%;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow:0 16px 40px rgba(0,0,0,.12);
+      border: 1px solid rgba(0,0,0,.06);
+      display:none;
+      background:#fff;
       position:relative;
-      flex:1;
-      height:380px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:12px;
-      overflow:hidden;
-      background:#f8fafc;
+      z-index: 2; /* keep above sparkles */
     }
-    #revealImg{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      display:block;
+    .babyImg.show{ display:block; }
+
+    .subText{
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      display:none;
+      position:relative;
+      z-index:2;
     }
+    .subText.show{ display:block; }
+
+    /* Scratch canvas layer */
     #scratchCanvas{
       position:absolute;
-      left:0;top:0;width:100%;height:100%;
+      inset:0;
+      width:100%;
+      height:100%;
       touch-action:none;
+      z-index: 1;
     }
 
-    .revealOverlay{
+    /* Top hint overlay (before reveal) */
+    .scratchHint{
       position:absolute;
-      left:0;top:0;width:100%;height:100%;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      pointer-events:none;
-      opacity:0;transform:scale(.98);
-      transition:opacity .28s ease, transform .28s ease;
-      text-align:center;
-      padding:16px;
-    }
-    .revealOverlay.show{opacity:1;transform:scale(1);}
-
-    .revealTitle{
-      font-size:34px;font-weight:1000;
-      margin:6px 0 4px;
-      background: linear-gradient(90deg,#ff6ea3,#ffb3d1);
-      -webkit-background-clip:text;background-clip:text;color:transparent;
-      text-shadow: 0 10px 30px rgba(0,0,0,.08);
-      letter-spacing:-.02em;
-    }
-    .revealSub{font-size:15px;color:var(--muted);margin-top:6px;}
-
-    .controls{
+      inset:0;
       display:flex;
-      gap:10px;
+      align-items:center;
       justify-content:center;
-      margin-top:8px;
+      pointer-events:none;
+      z-index: 2;
+    }
+    .scratchHintInner{
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.40);
+      border: 1px dashed rgba(255,255,255,.8);
+      color: rgba(255,255,255,.95);
+      font-weight: 1000;
+      letter-spacing: -.01em;
+      text-shadow: 0 8px 20px rgba(0,0,0,.22);
+    }
+
+    /* Fireworks canvas (keep behind the card so it never covers image) */
+    #fx{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      z-index: 0;     /* behind everything */
+      display:none;
+    }
+    #fx.show{ display:block; }
+
+    /* Floating sparkles (also behind image) */
+    .spark{
+      position:absolute;
+      font-size: 18px;
+      opacity:.9;
+      animation: rise 2.6s linear forwards;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
+      pointer-events:none;
+      z-index: 0; /* behind baby image */
+    }
+    @keyframes rise{
+      0%{ transform: translateY(0) scale(1); opacity:0; }
+      12%{ opacity:.95; }
+      100%{ transform: translateY(-240px) scale(1.15); opacity:0; }
+    }
+
+    .footer{
+      text-align:center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 12px;
+      user-select:none;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:center;
+      gap:10px;
       flex-wrap:wrap;
+      margin-top: 12px;
     }
     .btn{
-      border-radius:12px;padding:10px 14px;border:none;font-weight:900;
-      cursor:pointer;background:#111827;color:#fff;
-      box-shadow:0 8px 20px rgba(17,24,39,.08);
+      appearance:none;
+      border:none;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-weight: 1000;
+      cursor:pointer;
+      background: #111827;
+      color: #fff;
+      transition: transform .08s ease, opacity .2s ease;
     }
-    .btn.ghost{background:transparent;color:#111827;border:1px solid rgba(0,0,0,.08);box-shadow:none;}
-    footer.info{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
-
-    @media (max-width:820px){
-      .card{flex-direction:column;gap:10px}
-      .left{flex:0 0 auto}
-      .scratchArea{height:330px}
-    }
+    .btn:active{ transform: scale(.98); }
   </style>
 </head>
 <body>
-  <div class="container" role="main">
-    <h1>캡틴이의 성별이 궁금한가요?</h1>
-    <p class="lead">이곳을 살살 긁어주세요 🫧</p>
+  <canvas id="fx"></canvas>
 
-    <div class="wrap">
-      <div class="card" aria-live="polite">
-        <div class="left">
-          <div class="iconBottle" title="젖병 아이콘">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect x="22" y="22" width="20" height="28" rx="3" fill="#fff"/>
-              <path d="M30 12c1.2 0 2 .8 2 2v4h-4v-4c0-1.2.8-2 2-2z" fill="#ffd57a"/>
-              <rect x="23" y="23" width="18" height="26" rx="2" fill="#f8fafc" stroke="#ffd57a" stroke-width="2"/>
-            </svg>
-          </div>
+  <div class="wrap">
+    <div class="title">캡틴이의 성별이 궁금한가요?</div>
 
-          <div class="hint">캡틴이의 성별이 궁금한가요?<br/>이곳을 살살 긁어주세요</div>
-          <div class="hintSmall">손가락(또는 마우스)으로 긁으면<br/>아래 이미지가 공개돼요 🎀</div>
-
-          <div class="controls">
-            <button class="btn" id="resetBtn" type="button">다시 숨기기</button>
-            <button class="btn ghost" id="revealBtn" type="button">바로 공개(테스트)</button>
-          </div>
+    <div class="card">
+      <div class="scratchBox" id="scratchBox">
+        <!-- Under layer (prize) -->
+        <div class="prize" aria-live="polite">
+          <div class="winText" id="winText">공주님! 입니다 💖</div>
+          <img class="babyImg" id="babyImg" src="baby.png" alt="아기 이미지" />
+          <p class="subText" id="subText">우리 가족에게 새로운 기쁨이 찾아왔어요.</p>
         </div>
 
-        <div class="scratchArea">
-          <!-- ✅ 공개될 이미지: 리포지토리 루트에 baby.png 업로드 -->
-          <img id="revealImg" src="baby.png" alt="공개 이미지" />
+        <!-- Scratch cover -->
+        <canvas id="scratchCanvas" aria-label="스크래치 영역"></canvas>
 
-          <!-- 긁기 레이어 -->
-          <canvas id="scratchCanvas" aria-hidden="true"></canvas>
-
-          <!-- 공개 후 멘트 -->
-          <div class="revealOverlay" id="revealOverlay" role="status" aria-live="polite">
-            <div style="font-size:42px; margin-bottom:6px;">🎉</div>
-            <div class="revealTitle" id="revealText">공주님 입니다!</div>
-            <div class="revealSub">우리 가족에게 새로운 기쁨이 찾아왔어요 💖</div>
-          </div>
+        <!-- Visual hint on top -->
+        <div class="scratchHint" id="scratchHint">
+          <div class="scratchHintInner">👆 여기 긁기</div>
         </div>
       </div>
-
-      <footer class="info">
-        (팁) 긁기가 잘 안 되면 브라우저를 최신으로 업데이트하거나, 화면을 조금 더 넓게 열어보세요.
-      </footer>
     </div>
+
+    <div class="actions">
+      <button class="btn" id="resetBtn" type="button">다시 하기</button>
+    </div>
+
+    <div class="footer">팁: 손가락으로 여러 번 살살 문지르면 복권처럼 잘 벗겨져요 ✨</div>
   </div>
 
   <script>
-    // ===== 설정 =====
-    const FINAL_TEXT = "공주님 입니다!";   // ✅ 요청대로 고정
-    const RADIUS = 26;                    // 긁는 브러시 크기
-    const CLEAR_THRESHOLD = 0.45;         // 45% 이상 긁으면 자동 공개
+    /**********************
+     * Scratch settings
+     **********************/
+    const RADIUS = 28;             // 브러시 크기
+    const CLEAR_THRESHOLD = 0.55;  // 55% 이상 긁으면 공개 (복권 느낌)
+    const COVER_COLOR = "#B9B1C9"; // 스크래치 코팅 색
 
-    const canvas = document.getElementById('scratchCanvas');
-    const img = document.getElementById('revealImg');
-    const overlay = document.getElementById('revealOverlay');
-    const revealTextEl = document.getElementById('revealText');
-    const resetBtn = document.getElementById('resetBtn');
-    const revealBtn = document.getElementById('revealBtn');
+    const canvas = document.getElementById("scratchCanvas");
+    const box = document.getElementById("scratchBox");
+    const hint = document.getElementById("scratchHint");
 
-    revealTextEl.textContent = FINAL_TEXT;
+    const winText = document.getElementById("winText");
+    const babyImg = document.getElementById("babyImg");
+    const subText = document.getElementById("subText");
+    const resetBtn = document.getElementById("resetBtn");
 
-    let ctx, drawing = false;
+    let ctx;
+    let drawing = false;
     let lastX = 0, lastY = 0;
+    let revealed = false;
 
+    /**********************
+     * Sparkles + fireworks
+     * - Must NOT cover baby image: keep behind the card / behind image
+     **********************/
+    const SPARKS = ["✨","🎆","🎇","💖","💫","🎉","🫧"];
+    function spawnSpark(){
+      if(revealed) return;
+      const el = document.createElement("div");
+      el.className = "spark";
+      el.textContent = SPARKS[Math.floor(Math.random()*SPARKS.length)];
+      el.style.left = (10 + Math.random()*80) + "%";
+      el.style.bottom = "-10px";
+      el.style.animationDuration = (2.1 + Math.random()*1.2) + "s";
+      box.appendChild(el);
+      setTimeout(()=> el.remove(), 3200);
+    }
+
+    // Fireworks (simple particles) behind everything (fx canvas z-index 0)
+    const fxCanvas = document.getElementById("fx");
+    const fxCtx = fxCanvas.getContext("2d");
+    let particles = [];
+    function resizeFx(){
+      fxCanvas.width = window.innerWidth * devicePixelRatio;
+      fxCanvas.height = window.innerHeight * devicePixelRatio;
+      fxCanvas.style.width = window.innerWidth + "px";
+      fxCanvas.style.height = window.innerHeight + "px";
+      fxCtx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    window.addEventListener("resize", resizeFx);
+    resizeFx();
+
+    function addBurst(x, y){
+      const count = 90;
+      for(let i=0;i<count;i++){
+        const a = Math.random() * Math.PI * 2;
+        const sp = 1.8 + Math.random()*5.8;
+        particles.push({
+          x, y,
+          vx: Math.cos(a)*sp,
+          vy: Math.sin(a)*sp - (Math.random()*1.6),
+          life: 70 + Math.random()*30,
+          r: 2 + Math.random()*2.2,
+          hue: Math.floor(Math.random()*360)
+        });
+      }
+    }
+    function fxLoop(){
+      fxCtx.clearRect(0,0, window.innerWidth, window.innerHeight);
+
+      particles = particles.filter(p => p.life > 0);
+      for(const p of particles){
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+        p.vy += 0.03;
+        p.life -= 1;
+
+        fxCtx.beginPath();
+        fxCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        fxCtx.fillStyle = `hsla(${p.hue}, 92%, 62%, ${Math.max(0, p.life/110)})`;
+        fxCtx.fill();
+      }
+      if(fxCanvas.classList.contains("show")){
+        requestAnimationFrame(fxLoop);
+      }
+    }
+
+    function startFireworks(){
+      fxCanvas.classList.add("show");
+      resizeFx();
+      const w = window.innerWidth, h = window.innerHeight;
+
+      // Bursts away from center-ish so it doesn't visually "sit" on the card
+      addBurst(w*0.15, h*0.22);
+      addBurst(w*0.85, h*0.20);
+      setTimeout(()=>addBurst(w*0.50, h*0.12), 180);
+      setTimeout(()=>addBurst(w*0.25, h*0.40), 360);
+      setTimeout(()=>addBurst(w*0.75, h*0.42), 520);
+
+      fxLoop();
+      setTimeout(()=>{
+        fxCanvas.classList.remove("show");
+        particles = [];
+        fxCtx.clearRect(0,0, w, h);
+      }, 3800);
+    }
+
+    /**********************
+     * Scratch implementation
+     **********************/
     function fitCanvas(){
-      const rect = canvas.getBoundingClientRect();
+      const rect = box.getBoundingClientRect();
       canvas.width = rect.width * devicePixelRatio;
       canvas.height = rect.height * devicePixelRatio;
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
 
-      ctx = canvas.getContext('2d');
-      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      ctx = canvas.getContext("2d");
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 
-      // 덮개 색 (스크래치 코팅 느낌)
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = '#c4b7d6';
+      // cover fill
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = COVER_COLOR;
       ctx.fillRect(0,0,rect.width,rect.height);
 
-      // 안내 텍스트(살짝)
-      ctx.fillStyle = 'rgba(255,255,255,0.10)';
-      ctx.font = '900 28px "Noto Sans KR", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('살살 긁어주세요', rect.width/2, rect.height/2);
+      // add subtle pattern/text
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      ctx.font = '1000 34px "Noto Sans KR", sans-serif';
+      ctx.textAlign = "center";
+      ctx.fillText("SCRATCH", rect.width/2, rect.height/2 - 6);
+      ctx.font = '900 16px "Noto Sans KR", sans-serif';
+      ctx.fillText("여기를 긁어주세요", rect.width/2, rect.height/2 + 22);
 
-      // 이제부터는 지우개 모드
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0,0,0,1)';
+      // switch to eraser mode
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "rgba(0,0,0,1)";
     }
 
     function erase(x,y){
@@ -233,107 +378,125 @@
       ctx.fill();
     }
 
-    function pointerDown(e){
-      drawing = true;
-      const rect = canvas.getBoundingClientRect();
-      lastX = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
-      lastY = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
-      erase(lastX, lastY);
+    function getPos(e){
+      const rect = box.getBoundingClientRect();
+      const clientX = (e.touches?.[0]?.clientX ?? e.clientX);
+      const clientY = (e.touches?.[0]?.clientY ?? e.clientY);
+      return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function pointerMove(e){
-      if(!drawing) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
-      const y = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
+    function down(e){
+      if(revealed) return;
+      drawing = true;
+      const p = getPos(e);
+      lastX = p.x; lastY = p.y;
+      erase(lastX, lastY);
+      hint.style.display = "none";
+      if(Math.random() < 0.5) spawnSpark();
+    }
 
-      const dx = x - lastX, dy = y - lastY;
+    function move(e){
+      if(!drawing || revealed) return;
+      const p = getPos(e);
+      const dx = p.x - lastX, dy = p.y - lastY;
       const dist = Math.hypot(dx,dy);
       const step = Math.max(1, Math.floor(dist / (RADIUS/2)));
-
       for(let i=0;i<=step;i++){
         const ix = lastX + dx*(i/step);
         const iy = lastY + dy*(i/step);
         erase(ix,iy);
       }
-      lastX = x; lastY = y;
+      lastX = p.x; lastY = p.y;
+      if(Math.random() < 0.12) spawnSpark();
     }
 
-    function pointerUp(){
+    function up(){
+      if(!drawing) return;
       drawing = false;
       requestAnimationFrame(checkClearPercent);
     }
 
     function checkClearPercent(){
+      if(revealed) return;
       try{
-        const w = canvas.width, h = canvas.height;
-
-        // 가볍게 샘플링해서 지워진 비율 계산
         const sampleScale = 8;
-        const sw = Math.max(20, Math.floor(w/sampleScale));
-        const sh = Math.max(20, Math.floor(h/sampleScale));
-
-        const small = document.createElement('canvas');
-        small.width = sw; small.height = sh;
-        const sctx = small.getContext('2d');
+        const sw = Math.max(24, Math.floor(canvas.width / sampleScale));
+        const sh = Math.max(24, Math.floor(canvas.height / sampleScale));
+        const small = document.createElement("canvas");
+        small.width = sw;
+        small.height = sh;
+        const sctx = small.getContext("2d");
         sctx.drawImage(canvas, 0, 0, sw, sh);
-
         const data = sctx.getImageData(0,0,sw,sh).data;
+
         let cleared = 0;
-        const total = sw*sh;
-
+        const total = sw * sh;
         for(let i=0;i<data.length;i+=4){
-          const alpha = data[i+3];
-          if(alpha === 0) cleared++;
+          if(data[i+3] === 0) cleared++;
         }
-
         const ratio = cleared / total;
-        if(ratio >= CLEAR_THRESHOLD) triggerReveal();
-      }catch(e){
-        console.warn('checkClearPercent error', e);
+        if(ratio >= CLEAR_THRESHOLD){
+          reveal();
+        }
+      }catch(err){
+        console.warn("checkClearPercent error", err);
       }
     }
 
-    function triggerReveal(){
-      overlay.classList.add('show');
-      // 캔버스를 전부 지워서 완전 공개
+    function reveal(){
+      if(revealed) return;
+      revealed = true;
+
+      // fully clear canvas
       ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      // show prize
+      winText.classList.add("show");
+      babyImg.classList.add("show");
+      subText.classList.add("show");
+
+      // fireworks behind the card
+      startFireworks();
+
+      // sparkles burst (behind image)
+      for(let i=0;i<14;i++){
+        setTimeout(spawnSpark, i*90);
+      }
+
+      // tiny vibration
+      try { navigator.vibrate?.([70, 50, 90]); } catch {}
     }
 
-    function resetScratch(){
-      overlay.classList.remove('show');
+    function resetAll(){
+      revealed = false;
+      hint.style.display = "flex";
+      winText.classList.remove("show");
+      babyImg.classList.remove("show");
+      subText.classList.remove("show");
       fitCanvas();
     }
 
-    function attachEvents(){
-      canvas.addEventListener('pointerdown', (e)=>{ e.preventDefault(); canvas.setPointerCapture(e.pointerId); pointerDown(e); }, {passive:false});
-      canvas.addEventListener('pointermove', (e)=>{ if(e.buttons===1) pointerMove(e); }, {passive:false});
-      canvas.addEventListener('pointerup', (e)=>{ canvas.releasePointerCapture?.(e.pointerId); pointerUp(); }, {passive:true});
-      canvas.addEventListener('pointercancel', pointerUp);
+    function attach(){
+      canvas.addEventListener("pointerdown", (e)=>{ e.preventDefault(); canvas.setPointerCapture(e.pointerId); down(e); }, {passive:false});
+      canvas.addEventListener("pointermove", (e)=>{ if(e.buttons === 1) move(e); }, {passive:false});
+      canvas.addEventListener("pointerup", (e)=>{ canvas.releasePointerCapture?.(e.pointerId); up(); }, {passive:true});
+      canvas.addEventListener("pointercancel", up);
 
-      // touch fallback
-      canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); pointerDown(e.touches[0]); }, {passive:false});
-      canvas.addEventListener('touchmove', (e)=>{ e.preventDefault(); pointerMove(e.touches[0]); }, {passive:false});
-      canvas.addEventListener('touchend', ()=>{ pointerUp(); }, {passive:true});
+      canvas.addEventListener("touchstart", (e)=>{ e.preventDefault(); down(e); }, {passive:false});
+      canvas.addEventListener("touchmove", (e)=>{ e.preventDefault(); move(e); }, {passive:false});
+      canvas.addEventListener("touchend", up, {passive:true});
 
-      resetBtn.addEventListener('click', resetScratch);
-      revealBtn.addEventListener('click', triggerReveal);
-      window.addEventListener('resize', ()=> setTimeout(fitCanvas,120));
+      resetBtn.addEventListener("click", resetAll);
+      window.addEventListener("resize", ()=> setTimeout(fitCanvas, 120));
     }
 
     function init(){
       fitCanvas();
-      attachEvents();
+      attach();
+      setInterval(()=>{ if(!revealed && Math.random()<0.55) spawnSpark(); }, 520);
     }
 
-    if(img.complete){
-      init();
-    } else {
-      img.addEventListener('load', init);
-      img.addEventListener('error', ()=>{
-        console.warn('baby.png 로드 실패: 리포지토리 루트에 baby.png 업로드했는지 확인하세요.');
-      });
-    }
+    window.addEventListener("load", init);
   </script>
 </body>
 </html>
